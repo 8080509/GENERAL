@@ -1,0 +1,46 @@
+class BinTreeId(object):
+
+    def __init__(self, num, bits):
+        self.num = num
+        self.bits = bits
+        assert(num.bit_length() <= bits)
+
+    def child(self, branch):
+        return BinTreeId(self.num | bool(branch) << self.bits, self.bits + 1)
+
+    def __repr__(self):
+        return format(self.num, '0' + str(self.bits) + 'b')
+
+class Context(object):
+    
+    def __init__(self, parent = None):
+        self.parent = parent
+        self.prevSib = None
+        self.sub = None
+        if parent:
+            self.nxt = parent.sub
+            parent.sub = self
+            if self.nxt: self.nxt.prevSib = self
+            if parent.freeIds:
+                self.ctxId = parent.freeIds.pop()
+            else:
+                self.ctxId = parent.childId.child(True)
+                parent.childId = parent.childId.child(False)
+        else:
+            self.nxt = None
+            self.ctxId = BinTreeId(0, 0)
+        self.childId = self.ctxId
+        self.freeIds = []
+    
+    #recycle context once use is exhausted
+    def recycle(self):
+        parent = self.parent
+        prevSib = self.prevSib
+        nxt = self.nxt
+        if nxt: nxt.prevSib = prevSib
+        if prevSib:
+            prevSib.nxt = nxt
+        else:
+            assert(parent.sub is self)
+            parent.sub = nxt
+        parent.freeIds.append(self.ctxId)
