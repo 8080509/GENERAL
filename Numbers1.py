@@ -55,16 +55,17 @@ class primeClass:
 	
 	def extend(self):
 		n = self.n
+		n1 = n + 1
 		m = self.data[-1]
-		for elem in range(n**2, (n+1)**2):
+		for elem in range(n*n, n1*n1):
 			if elem <= m:
 				continue
 			for p in self:
 				if p > n:
-					self.append(elem)
+					self.data.append(elem)
 					break
 				if divs(p,elem): break
-		self.n = n + 1
+		self.n = n1
 	
 	def __getitem__(self, i):
 		while i >= len(self.data):
